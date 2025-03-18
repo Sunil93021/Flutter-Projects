@@ -10,10 +10,7 @@ class XChangeLearnApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        textTheme: TextTheme(bodyLarge: TextStyle(fontSize: 18)),
-      ),
+      theme: ThemeData(fontFamily: 'Arial'),
       home: SplashScreen(),
     );
   }

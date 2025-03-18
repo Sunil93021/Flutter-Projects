@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'chat_screen.dart';
+import 'profile_screen.dart'; // Import ProfileApp screen
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -31,6 +32,15 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void openProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProfileScreen(),
+      ), // Open profile screen
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,6 +50,12 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: true,
         elevation: 5,
         backgroundColor: Colors.blueAccent,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.person), // Profile icon
+            onPressed: openProfile,
+          ),
+        ],
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
