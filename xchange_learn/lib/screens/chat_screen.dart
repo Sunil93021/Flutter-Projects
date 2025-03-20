@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
   final String skill;
-  ChatScreen({required this.skill});
+  const ChatScreen({super.key, required this.skill});
 
   @override
   _ChatScreenState createState() => _ChatScreenState();

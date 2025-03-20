@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'screens/splash_screen.dart';
 
-void main() {
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
+void main() async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(XChangeLearnApp());
 }
 
 class XChangeLearnApp extends StatelessWidget {
+  const XChangeLearnApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -15,3 +21,5 @@ class XChangeLearnApp extends StatelessWidget {
     );
   }
 }
+
+// ...

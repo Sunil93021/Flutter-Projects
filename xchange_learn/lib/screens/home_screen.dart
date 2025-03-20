@@ -3,6 +3,8 @@ import 'chat_screen.dart';
 import 'profile_screen.dart'; // Import ProfileApp screen
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }

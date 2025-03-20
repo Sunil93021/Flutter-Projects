@@ -5,7 +5,8 @@ class CustomButton extends StatelessWidget {
   final VoidCallback onPressed;
   final Color color;
 
-  CustomButton({
+  const CustomButton({
+    super.key,
     required this.text,
     required this.onPressed,
     this.color = Colors.blueAccent,
@@ -30,7 +31,12 @@ class CustomCard extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
 
-  CustomCard({required this.title, required this.icon, required this.onTap});
+  const CustomCard({
+    super.key,
+    required this.title,
+    required this.icon,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
