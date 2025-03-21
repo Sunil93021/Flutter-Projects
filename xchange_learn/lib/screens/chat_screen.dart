@@ -1,58 +1,73 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
-  final String skill;
-  const ChatScreen({super.key, required this.skill});
+  final String skillName;
+
+  ChatScreen({required this.skillName});
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final TextEditingController messageController = TextEditingController();
-  List<String> messages = [];
-
-  @override
-  void initState() {
-    super.initState();
-    messages.add("Hello! I want to learn ${widget.skill}");
-  }
-
-  void sendMessage() {
-    if (messageController.text.isNotEmpty) {
-      setState(() {
-        messages.add(messageController.text);
-        messageController.clear();
-      });
-    }
-  }
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final TextEditingController _messageController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Chat about ${widget.skill}"),
-        backgroundColor: Colors.blueAccent,
-      ),
+      appBar: AppBar(title: Text("${widget.skillName} Chat")),
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                bool isMe = index % 2 == 0;
-                return Align(
-                  alignment:
-                      isMe ? Alignment.centerLeft : Alignment.centerRight,
-                  child: Container(
-                    margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: isMe ? Colors.blue[100] : Colors.green[100],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(messages[index]),
-                  ),
+            child: StreamBuilder<QuerySnapshot>(
+              stream:
+                  _firestore
+                      .collection('chats')
+                      .doc(widget.skillName) // Use skill name as chat ID
+                      .collection('messages')
+                      .orderBy('timestamp', descending: true)
+                      .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                var messages = snapshot.data!.docs;
+                return ListView.builder(
+                  reverse: true, // Show latest messages at bottom
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) {
+                    var messageData = messages[index];
+                    String message = messageData['text'];
+                    String senderId = messageData['senderId'];
+                    bool isMe = senderId == _auth.currentUser!.uid;
+
+                    return Align(
+                      alignment:
+                          isMe ? Alignment.centerRight : Alignment.centerLeft,
+                      child: Container(
+                        margin: EdgeInsets.symmetric(
+                          vertical: 5,
+                          horizontal: 10,
+                        ),
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: isMe ? Colors.blueAccent : Colors.grey[300],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          message,
+                          style: TextStyle(
+                            color: isMe ? Colors.white : Colors.black,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ),
@@ -63,22 +78,13 @@ class _ChatScreenState extends State<ChatScreen> {
               children: [
                 Expanded(
                   child: TextField(
-                    controller: messageController,
-                    decoration: InputDecoration(
-                      hintText: "Type a message...",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
+                    controller: _messageController,
+                    decoration: InputDecoration(hintText: "Type a message..."),
                   ),
                 ),
-                SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: sendMessage,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                  ),
-                  child: Icon(Icons.send),
+                IconButton(
+                  icon: Icon(Icons.send, color: Colors.blue),
+                  onPressed: _sendMessage,
                 ),
               ],
             ),
@@ -86,5 +92,22 @@ class _ChatScreenState extends State<ChatScreen> {
         ],
       ),
     );
+  }
+
+  void _sendMessage() async {
+    String message = _messageController.text.trim();
+    if (message.isEmpty) return;
+
+    _firestore
+        .collection('chats')
+        .doc(widget.skillName) // Use skill name as chat ID (group chat)
+        .collection('messages')
+        .add({
+          'text': message,
+          'senderId': _auth.currentUser!.uid,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+
+    _messageController.clear();
   }
 }

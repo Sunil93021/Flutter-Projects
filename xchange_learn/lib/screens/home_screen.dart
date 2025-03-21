@@ -1,146 +1,118 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'chat_screen.dart';
-import 'profile_screen.dart'; // Import ProfileApp screen
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final TextEditingController skillController = TextEditingController();
-  List<String> skills = [
-    "Python",
-    "Graphic Design",
-    "Guitar",
-    "Public Speaking",
-  ];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final TextEditingController _skillController = TextEditingController();
 
-  void addSkill() {
-    if (skillController.text.isNotEmpty) {
-      setState(() {
-        skills.insert(0, skillController.text);
-        skillController.clear();
-      });
+  void _addSkill() async {
+    String skill = _skillController.text.trim();
+    if (skill.isNotEmpty) {
+      // Check if skill already exists
+      var existingSkills =
+          await _firestore
+              .collection('skills')
+              .where('skill', isEqualTo: skill)
+              .get();
+
+      if (existingSkills.docs.isEmpty) {
+        await _firestore.collection('skills').add({'skill': skill});
+      }
+      _skillController.clear();
     }
-  }
-
-  void openChat(String skill) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ChatScreen(skill: skill)),
-    );
-  }
-
-  void openProfile() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProfileScreen(),
-      ), // Open profile screen
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue[50],
       appBar: AppBar(
-        title: Text("XChange Learn"),
-        centerTitle: true,
-        elevation: 5,
-        backgroundColor: Colors.blueAccent,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.person), // Profile icon
-            onPressed: openProfile,
-          ),
-        ],
+        title: Text('XChange Learn'),
+        backgroundColor: Colors.blue,
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "What skill can you teach?",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Row(
+      body: Column(
+        children: [
+          // Skill Input Bar
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Row(
               children: [
                 Expanded(
                   child: TextField(
-                    controller: skillController,
+                    controller: _skillController,
                     decoration: InputDecoration(
-                      hintText: "E.g., Python, Guitar, Design...",
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      hintText: 'Enter a skill to add',
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
                     ),
                   ),
                 ),
                 SizedBox(width: 10),
                 ElevatedButton(
-                  onPressed: addSkill,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                  ),
-                  child: Text("Add"),
+                  onPressed: _addSkill,
+                  child: Text('Add'),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
                 ),
               ],
             ),
-            SizedBox(height: 20),
-            Text(
-              "Available Skills",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Expanded(
-              child:
-                  skills.isEmpty
-                      ? Center(
-                        child: Text(
-                          "No skills added yet!",
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      )
-                      : ListView.builder(
-                        itemCount: skills.length,
-                        itemBuilder: (context, index) {
-                          return GestureDetector(
-                            onTap: () => openChat(skills[index]),
-                            child: Card(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 4,
-                              child: ListTile(
-                                leading: Icon(
-                                  Icons.school,
-                                  color: Colors.blueAccent,
-                                ),
-                                title: Text(
-                                  skills[index],
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                trailing: Icon(
-                                  Icons.chat,
-                                  color: Colors.blueAccent,
-                                ),
-                              ),
+          ),
+          Divider(),
+          // Skill List
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _firestore.collection('skills').snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                var skills = snapshot.data!.docs;
+                if (skills.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No skills available. Add a skill to start!',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  itemCount: skills.length,
+                  itemBuilder: (context, index) {
+                    var skillData = skills[index];
+                    String skillName = skillData['skill'];
+
+                    return Card(
+                      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      child: ListTile(
+                        title: Text(skillName, style: TextStyle(fontSize: 18)),
+                        subtitle: Text("Tap to join chat"),
+                        trailing: Icon(Icons.chat, color: Colors.blue),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => ChatScreen(skillName: skillName),
                             ),
                           );
                         },
                       ),
+                    );
+                  },
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
