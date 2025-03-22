@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:xchange_learn/screens/splash_screen.dart';
 import 'dart:math'; // For generating random numbers
 import 'home_screen.dart';
 
@@ -83,7 +84,7 @@ class _AuthScreensState extends State<AuthScreens> {
       if (userCredential.user != null) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomeScreen()),
+          MaterialPageRoute(builder: (context) => SplashScreen()),
         );
       }
     } catch (e) {

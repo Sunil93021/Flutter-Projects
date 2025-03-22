@@ -46,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
 
-      body: myWidget[myIndex],
+      body: IndexedStack(children: myWidget, index: myIndex),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.blue[700],
         selectedItemColor: Colors.white,

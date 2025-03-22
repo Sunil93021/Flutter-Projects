@@ -38,7 +38,7 @@ class AuthWrapper extends StatelessWidget {
           return Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasData && snapshot.data != null) {
-          return HomeScreen();
+          return SplashScreen();
         } else {
           return AuthScreens();
         }
