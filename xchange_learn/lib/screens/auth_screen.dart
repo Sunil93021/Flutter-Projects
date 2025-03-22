@@ -44,25 +44,36 @@ class _AuthScreensState extends State<AuthScreens> {
           password: password,
         );
 
-        // Check if the user has a "name" field in Firestore
+        // Fetch user document
         DocumentSnapshot userDoc =
             await _firestore
                 .collection('users')
                 .doc(userCredential.user!.uid)
                 .get();
 
-        if (!userDoc.exists || !userDoc.data().toString().contains("name")) {
+        if (userDoc.exists) {
+          Map<String, dynamic>? userData =
+              userDoc.data() as Map<String, dynamic>?;
+
           // Assign a default name if missing
-          String randomName = generateRandomUsername();
-          await _firestore
-              .collection('users')
-              .doc(userCredential.user!.uid)
-              .set(
-                {'name': randomName, 'email': email},
-                SetOptions(
-                  merge: true,
-                ), // Merge to avoid overwriting existing fields
-              );
+          if (userData == null || !userData.containsKey("name")) {
+            String randomName = generateRandomUsername();
+            await _firestore
+                .collection('users')
+                .doc(userCredential.user!.uid)
+                .set({
+                  'name': randomName,
+                  'email': email,
+                }, SetOptions(merge: true));
+          }
+
+          // Assign default chatCount if missing
+          if (userData == null || !userData.containsKey("chatCount")) {
+            await _firestore
+                .collection('users')
+                .doc(userCredential.user!.uid)
+                .set({'chatCount': 0}, SetOptions(merge: true));
+          }
         }
       } else {
         // Register a new user
@@ -78,6 +89,7 @@ class _AuthScreensState extends State<AuthScreens> {
         await _firestore.collection('users').doc(userCredential.user!.uid).set({
           'name': randomName,
           'email': email,
+          'chatCount': 0, // Initialize chatCount to 0 for new users
         });
       }
 
@@ -89,6 +101,7 @@ class _AuthScreensState extends State<AuthScreens> {
       }
     } catch (e) {
       ScaffoldMessenger.of(
+        // ignore: use_build_context_synchronously
         context,
       ).showSnackBar(SnackBar(content: Text("Error: ${e.toString()}")));
     }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:xchange_learn/screens/leader_board.dart';
 import 'profile_screen.dart';
 import 'skills_screen.dart';
 import 'auth_screen.dart';
@@ -13,10 +14,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int myIndex = 0;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  List<Widget> myWidget = const [
+  List<Widget> myWidget = [
     // HomeScreen(),
     SkillsScreen(),
-    Center(child: Text("Sorry , This page is on Working ")),
+    // LeaderboardScreen(),
+    Text("dfsd"),
     ProfileScreen(),
   ];
 

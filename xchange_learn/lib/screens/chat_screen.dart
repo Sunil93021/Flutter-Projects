@@ -40,6 +40,23 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  void incrementMessageCount() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentReference userRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid);
+
+      FirebaseFirestore.instance.runTransaction((transaction) async {
+        DocumentSnapshot snapshot = await transaction.get(userRef);
+        if (snapshot.exists) {
+          int newCount = (snapshot['messageCount'] ?? 0) + 1;
+          transaction.update(userRef, {'messageCount': newCount});
+        }
+      });
+    }
+  }
+
   // ✅ Send Message to Firestore
   void _sendMessage() async {
     if (_messageController.text.trim().isEmpty) return;
@@ -54,6 +71,7 @@ class _ChatScreenState extends State<ChatScreen> {
           "senderName": _username,
           "timestamp": FieldValue.serverTimestamp(),
         });
+    incrementMessageCount();
 
     _messageController.clear();
   }
