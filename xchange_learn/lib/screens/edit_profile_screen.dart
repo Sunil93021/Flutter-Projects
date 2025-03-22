@@ -14,8 +14,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _bioController = TextEditingController();
+  final TextEditingController _skillsController = TextEditingController();
   String _profilePic = "";
   bool _isLoading = false;
+  List<String> _skills = [];
 
   @override
   void initState() {
@@ -31,14 +34,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           await _firestore.collection('users').doc(user.uid).get();
 
       setState(() {
-        _nameController.text =
-            userDoc.data().toString().contains("name")
-                ? userDoc["name"]
-                : user.displayName ?? "No Name";
-        _profilePic =
-            userDoc.data().toString().contains("profilePic")
-                ? userDoc["profilePic"]
-                : "";
+        _nameController.text = userDoc["name"] ?? "No Name";
+        _bioController.text = userDoc["bio"] ?? "No Bio Available";
+        _profilePic = userDoc["profilePic"] ?? "";
+        _skills = List<String>.from(userDoc["skills"] ?? []);
       });
     }
   }
@@ -53,8 +52,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (user != null) {
       await _firestore.collection('users').doc(user.uid).update({
         'name': _nameController.text.trim(),
-        'profilePic':
-            _profilePic, // You can update this later with image upload
+        'bio': _bioController.text.trim(),
+        'profilePic': _profilePic, // Update later with image upload
+        'skills': _skills,
       });
 
       setState(() {
@@ -69,6 +69,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
+  // ✅ Add Skill
+  void _addSkill() {
+    String newSkill = _skillsController.text.trim();
+    if (newSkill.isNotEmpty && !_skills.contains(newSkill)) {
+      setState(() {
+        _skills.add(newSkill);
+        _skillsController.clear();
+      });
+    }
+  }
+
+  // ✅ Remove Skill
+  void _removeSkill(String skill) {
+    setState(() {
+      _skills.remove(skill);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,7 +95,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         title: Text("Edit Profile"),
         backgroundColor: Colors.blue.shade700,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -102,6 +120,45 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 labelText: "Name",
                 border: OutlineInputBorder(),
               ),
+            ),
+            SizedBox(height: 15),
+
+            // ✅ Bio Input Field
+            TextField(
+              controller: _bioController,
+              decoration: InputDecoration(
+                labelText: "Bio",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 20),
+
+            // ✅ Skills Section
+            TextField(
+              controller: _skillsController,
+              decoration: InputDecoration(
+                labelText: "Add Skill",
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.add),
+                  onPressed: _addSkill,
+                ),
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 10),
+
+            Wrap(
+              spacing: 10,
+              children:
+                  _skills
+                      .map(
+                        (skill) => Chip(
+                          label: Text(skill),
+                          deleteIcon: Icon(Icons.close),
+                          onDeleted: () => _removeSkill(skill),
+                        ),
+                      )
+                      .toList(),
             ),
             SizedBox(height: 20),
 
