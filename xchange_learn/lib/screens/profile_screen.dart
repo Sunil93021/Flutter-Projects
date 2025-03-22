@@ -26,18 +26,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _loadUserData();
   }
 
-  // ✅ Load User Data from Firestore
   void _loadUserData() async {
     if (_user != null) {
-      DocumentSnapshot userDoc =
-          await _firestore.collection('users').doc(_user!.uid).get();
+      DocumentReference userRef = _firestore
+          .collection('users')
+          .doc(_user!.uid);
+      DocumentSnapshot userDoc = await userRef.get();
 
       if (userDoc.exists) {
+        // Get data safely, setting defaults if fields are missing
+        Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+
         setState(() {
-          _name = userDoc["name"] ?? "No Name";
-          _bio = userDoc["bio"] ?? "No Bio Available";
-          _profilePic = userDoc["profilePic"] ?? "";
-          _skills = List<String>.from(userDoc["skills"] ?? []);
+          _name = userData["name"] ?? "No Name";
+          _bio = userData["bio"] ?? "No Bio Available";
+          _profilePic = userData["profilePic"] ?? "";
+          _skills =
+              userData["skills"] != null
+                  ? List<String>.from(userData["skills"])
+                  : [];
+        });
+
+        // ✅ Check for missing fields and update Firestore
+        Map<String, dynamic> missingFields = {};
+        if (!userData.containsKey("name")) missingFields["name"] = "No Name";
+        if (!userData.containsKey("bio"))
+          missingFields["bio"] = "No Bio Available";
+        if (!userData.containsKey("profilePic"))
+          missingFields["profilePic"] = "";
+        if (!userData.containsKey("skills")) missingFields["skills"] = [];
+
+        if (missingFields.isNotEmpty) {
+          await userRef.update(missingFields);
+        }
+      } else {
+        // ✅ If document does not exist, create it with default values
+        Map<String, dynamic> defaultData = {
+          "name": "No Name",
+          "bio": "No Bio Available",
+          "profilePic": "",
+          "skills": [],
+        };
+        await userRef.set(defaultData);
+        setState(() {
+          _name = defaultData["name"];
+          _bio = defaultData["bio"];
+          _profilePic = defaultData["profilePic"];
+          _skills = defaultData["skills"];
         });
       }
     }
