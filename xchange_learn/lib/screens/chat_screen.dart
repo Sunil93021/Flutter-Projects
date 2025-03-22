@@ -7,7 +7,7 @@ class ChatScreen extends StatefulWidget {
   final String skillId;
   final String skillName;
 
-  ChatScreen({required this.skillId, required this.skillName});
+  const ChatScreen({super.key, required this.skillId, required this.skillName});
 
   @override
   _ChatScreenState createState() => _ChatScreenState();

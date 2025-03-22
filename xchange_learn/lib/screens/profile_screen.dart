@@ -4,14 +4,16 @@ import 'package:flutter/material.dart';
 import 'auth_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
   User? user = FirebaseAuth.instance.currentUser;
-  TextEditingController _nameController = TextEditingController();
-  TextEditingController _bioController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _bioController = TextEditingController();
   bool _isLoading = false;
 
   @override
@@ -80,8 +82,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SizedBox(height: 10),
             ElevatedButton(
               onPressed: _logout,
-              child: Text('Logout'),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              child: Text('Logout'),
             ),
           ],
         ),

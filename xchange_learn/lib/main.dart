@@ -2,8 +2,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:xchange_learn/screens/auth_screen.dart';
-import 'package:xchange_learn/screens/home_screen.dart';
-import 'package:xchange_learn/screens/profile_screen.dart';
 import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
 
@@ -14,6 +12,8 @@ void main() async {
 }
 
 class XChangeLearnApp extends StatelessWidget {
+  const XChangeLearnApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -26,6 +26,8 @@ class XChangeLearnApp extends StatelessWidget {
 }
 
 class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(

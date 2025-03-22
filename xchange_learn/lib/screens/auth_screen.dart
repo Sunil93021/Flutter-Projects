@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:math'; // For generating random numbers
-
 import 'home_screen.dart';
 
 class AuthScreens extends StatefulWidget {
@@ -97,40 +96,100 @@ class _AuthScreensState extends State<AuthScreens> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_isLogin ? "Login" : "Register")),
+      backgroundColor: Colors.blue.shade50, // Light blue background
+      appBar: AppBar(
+        backgroundColor: Colors.blue.shade700, // Dark blue AppBar
+        title: Text(
+          _isLogin ? "Login" : "Register",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: "Email"),
-              keyboardType: TextInputType.emailAddress,
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // 🔹 App Logo Placeholder
+                Icon(Icons.person, size: 80, color: Colors.blue.shade700),
+
+                SizedBox(height: 16),
+
+                // 🔹 Email Input Field
+                TextField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    labelText: "Email",
+                    prefixIcon: Icon(Icons.email, color: Colors.blue.shade700),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                ),
+
+                SizedBox(height: 12),
+
+                // 🔹 Password Input Field
+                TextField(
+                  controller: _passwordController,
+                  decoration: InputDecoration(
+                    labelText: "Password",
+                    prefixIcon: Icon(Icons.lock, color: Colors.blue.shade700),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                  obscureText: true,
+                ),
+
+                SizedBox(height: 20),
+
+                // 🔹 Login / Register Button
+                ElevatedButton(
+                  onPressed: _submitAuthForm,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue.shade700,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                  ),
+                  child: Text(
+                    _isLogin ? "Login" : "Register",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+
+                SizedBox(height: 12),
+
+                // 🔹 Toggle Between Login and Register
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _isLogin = !_isLogin;
+                    });
+                  },
+                  child: Text(
+                    _isLogin
+                        ? "Create an account"
+                        : "Already have an account? Login",
+                    style: TextStyle(
+                      color: Colors.blue.shade900,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: "Password"),
-              obscureText: true,
-            ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: _submitAuthForm,
-              child: Text(_isLogin ? "Login" : "Register"),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _isLogin = !_isLogin;
-                });
-              },
-              child: Text(
-                _isLogin
-                    ? "Create an account"
-                    : "Already have an account? Login",
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

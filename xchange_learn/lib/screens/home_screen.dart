@@ -7,6 +7,8 @@ import 'profile_screen.dart';
 import 'auth_screen.dart';
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -22,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _user = _auth.currentUser;
   }
 
-  // ✅ LOGOUT FUNCTION
+  // ✅ Logout Function
   void _logout() async {
     await _auth.signOut();
     Navigator.pushReplacement(
@@ -34,10 +36,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.blue.shade50, // Light blue background
       appBar: AppBar(
+        backgroundColor: Colors.blue.shade700, // Dark blue AppBar
         title: Text(
           "XChange Learn",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         actions: [
           // 🔹 Profile Button
@@ -62,15 +66,26 @@ class _HomeScreenState extends State<HomeScreen> {
           // 🔹 HEADER TEXT
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Text(
-              "Available Skills",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Available Skills",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue.shade900,
+                ),
+              ),
             ),
           ),
           // 🔹 SKILLS LIST FROM FIRESTORE
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _firestore.collection("skills").snapshots(),
+              stream:
+                  _firestore
+                      .collection("skills")
+                      .orderBy("timestamp", descending: true)
+                      .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
@@ -86,6 +101,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (context, index) {
                     var skill = skills[index];
                     String skillName = skill["skillName"];
+                    String description =
+                        skill.data().toString().contains("description")
+                            ? skill["description"]
+                            : "No description provided"; // ✅ Default value if missing
+                    String addedBy =
+                        skill.data().toString().contains("addedBy")
+                            ? skill["addedBy"]
+                            : "Anonymous User"; // ✅ Default value if missing
                     String skillId = skill.id;
 
                     return Card(
@@ -100,8 +123,31 @@ class _HomeScreenState extends State<HomeScreen> {
                           skillName,
                           style: TextStyle(
                             fontSize: 18,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue.shade900,
                           ),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 5),
+                            Text(
+                              description, // ✅ Show the skill description
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                            SizedBox(height: 5),
+                            Text(
+                              "Added by: $addedBy", // ✅ Show who added the skill
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.blueGrey,
+                              ),
+                            ),
+                          ],
                         ),
                         trailing: Icon(
                           Icons.arrow_forward_ios,
@@ -131,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       // 🔹 Floating "Add Skill" Button
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.blue.shade700,
         onPressed: () {
           Navigator.push(
             context,
