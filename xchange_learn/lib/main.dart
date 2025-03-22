@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:xchange_learn/screens/auth_screen.dart';
+import 'package:xchange_learn/screens/home_screen.dart';
 import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
 
@@ -37,7 +38,7 @@ class AuthWrapper extends StatelessWidget {
           return Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasData && snapshot.data != null) {
-          return SplashScreen();
+          return HomeScreen();
         } else {
           return AuthScreens();
         }

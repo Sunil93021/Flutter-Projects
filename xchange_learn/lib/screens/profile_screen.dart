@@ -1,6 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'edit_profile_screen.dart';
 import 'auth_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -11,81 +12,110 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  User? user = FirebaseAuth.instance.currentUser;
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _bioController = TextEditingController();
-  bool _isLoading = false;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  User? _user;
+  String _name = "";
+  String _email = "";
+  String _profilePic = "";
 
   @override
   void initState() {
     super.initState();
-    _fetchUserData();
+    _user = _auth.currentUser;
+    _loadUserData();
   }
 
-  void _fetchUserData() async {
-    var doc =
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user!.uid)
-            .get();
-    if (doc.exists) {
+  // ✅ Load User Data from Firestore
+  void _loadUserData() async {
+    if (_user != null) {
+      DocumentSnapshot userDoc =
+          await _firestore.collection('users').doc(_user!.uid).get();
+
       setState(() {
-        _nameController.text = doc['name'] ?? '';
-        _bioController.text = doc['bio'] ?? '';
+        _name =
+            userDoc.data().toString().contains("name")
+                ? userDoc["name"]
+                : "No Name";
+        _email =
+            userDoc.data().toString().contains("email")
+                ? userDoc["email"]
+                : _user!.email ?? "No Email";
+        _profilePic =
+            userDoc.data().toString().contains("profilePic")
+                ? userDoc["profilePic"]
+                : "";
       });
     }
   }
 
-  void _updateProfile() async {
-    setState(() => _isLoading = true);
-    await FirebaseFirestore.instance.collection('users').doc(user!.uid).set({
-      'name': _nameController.text,
-      'bio': _bioController.text,
-    }, SetOptions(merge: true));
-    setState(() => _isLoading = false);
-  }
-
+  // ✅ Logout Function not needed now for future purposes
   void _logout() async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushAndRemoveUntil(
+    await _auth.signOut();
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => AuthScreens()),
-      (route) => false,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Profile')),
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            CircleAvatar(radius: 40, child: Icon(Icons.person, size: 50)),
-            SizedBox(height: 10),
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(labelText: 'Name'),
-            ),
-            TextField(
-              controller: _bioController,
-              decoration: InputDecoration(labelText: 'Bio'),
-            ),
-            SizedBox(height: 20),
-            _isLoading
-                ? CircularProgressIndicator()
-                : ElevatedButton(
-                  onPressed: _updateProfile,
-                  child: Text('Update Profile'),
+      backgroundColor: Colors.blue.shade50,
+
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // ✅ Profile Picture
+              CircleAvatar(
+                radius: 60,
+                backgroundColor: Colors.grey.shade300,
+                backgroundImage:
+                    _profilePic.isNotEmpty ? NetworkImage(_profilePic) : null,
+                child:
+                    _profilePic.isEmpty
+                        ? Icon(Icons.person, size: 60, color: Colors.white)
+                        : null,
+              ),
+              SizedBox(height: 15),
+
+              // ✅ User Name
+              Text(
+                _name,
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 5),
+
+              // ✅ User Email
+              Text(
+                _email,
+                style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
+              ),
+              SizedBox(height: 20),
+
+              // ✅ Edit Profile Button
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditProfileScreen(),
+                    ),
+                  ).then((_) => _loadUserData()); // Reload profile after edit
+                },
+                icon: Icon(Icons.edit, color: Colors.white),
+                label: Text("Edit Profile"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue.shade700,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: _logout,
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: Text('Logout'),
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
