@@ -30,7 +30,7 @@ class _AuthScreensState extends State<AuthScreens> {
   void _submitAuthForm() async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
-
+    if (!context.mounted) return;
     if (email.isEmpty || password.isEmpty) return;
 
     try {
