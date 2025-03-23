@@ -50,10 +50,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         // ✅ Check for missing fields and update Firestore
         Map<String, dynamic> missingFields = {};
         if (!userData.containsKey("name")) missingFields["name"] = "No Name";
-        if (!userData.containsKey("bio"))
+        if (!userData.containsKey("bio")) {
           missingFields["bio"] = "No Bio Available";
-        if (!userData.containsKey("profilePic"))
+        }
+        if (!userData.containsKey("profilePic")) {
           missingFields["profilePic"] = "";
+        }
         if (!userData.containsKey("skills")) missingFields["skills"] = [];
 
         if (missingFields.isNotEmpty) {
@@ -199,7 +201,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 // ✅ Widget for skill chips
 class SkillChip extends StatelessWidget {
   final String skill;
-  SkillChip(this.skill);
+  const SkillChip(this.skill, {super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LeaderboardScreen extends StatelessWidget {
+  const LeaderboardScreen({super.key});
+
   Future<List<Map<String, dynamic>>> fetchLeaderboard() async {
     try {
       QuerySnapshot snapshot =
@@ -125,7 +127,7 @@ class RankCard extends StatelessWidget {
   final Map<String, dynamic> player;
   final Color medalColor;
 
-  RankCard(this.player, this.medalColor);
+  const RankCard(this.player, this.medalColor, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -165,7 +167,7 @@ class RankCard extends StatelessWidget {
 class PlayerTile extends StatelessWidget {
   final Map<String, dynamic> player;
 
-  PlayerTile(this.player);
+  const PlayerTile(this.player, {super.key});
 
   @override
   Widget build(BuildContext context) {

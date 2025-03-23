@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'chat_screen.dart';
 import 'add_skill_screen.dart';
-import 'profile_screen.dart';
 import 'auth_screen.dart';
 
 class SkillsScreen extends StatefulWidget {

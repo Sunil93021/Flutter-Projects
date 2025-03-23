@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:xchange_learn/screens/splash_screen.dart';
 import 'dart:math'; // For generating random numbers
-import 'home_screen.dart';
 
 class AuthScreens extends StatefulWidget {
   const AuthScreens({super.key});
@@ -30,7 +29,7 @@ class _AuthScreensState extends State<AuthScreens> {
   void _submitAuthForm() async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
-
+    if (!mounted) return; // Check if widget is mounted before proceeding
     if (email.isEmpty || password.isEmpty) return;
 
     try {
@@ -55,7 +54,6 @@ class _AuthScreensState extends State<AuthScreens> {
           Map<String, dynamic>? userData =
               userDoc.data() as Map<String, dynamic>?;
 
-          // Assign a default name if missing
           if (userData == null || !userData.containsKey("name")) {
             String randomName = generateRandomUsername();
             await _firestore
@@ -67,7 +65,6 @@ class _AuthScreensState extends State<AuthScreens> {
                 }, SetOptions(merge: true));
           }
 
-          // Assign default chatCount if missing
           if (userData == null || !userData.containsKey("chatCount")) {
             await _firestore
                 .collection('users')
@@ -85,7 +82,6 @@ class _AuthScreensState extends State<AuthScreens> {
 
         String randomName = generateRandomUsername(); // Generate default name
 
-        // Save user data to Firestore
         await _firestore.collection('users').doc(userCredential.user!.uid).set({
           'name': randomName,
           'email': email,
@@ -93,17 +89,18 @@ class _AuthScreensState extends State<AuthScreens> {
         });
       }
 
-      if (userCredential.user != null) {
+      if (mounted) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => SplashScreen()),
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        // ignore: use_build_context_synchronously
-        context,
-      ).showSnackBar(SnackBar(content: Text("Error: ${e.toString()}")));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: ${e.toString()}")));
+      }
     }
   }
 

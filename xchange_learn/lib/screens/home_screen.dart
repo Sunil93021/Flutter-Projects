@@ -6,7 +6,7 @@ import 'auth_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -48,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
 
-      body: IndexedStack(children: myWidget, index: myIndex),
+      body: IndexedStack(index: myIndex, children: myWidget),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.blue[700],
         selectedItemColor: Colors.white,
