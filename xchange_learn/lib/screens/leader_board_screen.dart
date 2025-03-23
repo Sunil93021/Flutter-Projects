@@ -57,7 +57,6 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         setState(() {
           leaderboard = players;
           isLoading = false;
-          print(leaderboard);
         });
       }
     } catch (error) {
