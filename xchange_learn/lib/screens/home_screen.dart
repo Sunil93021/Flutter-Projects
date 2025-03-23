@@ -3,6 +3,7 @@ import 'profile_screen.dart';
 import 'skills_screen.dart';
 import 'auth_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'leader_board_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -13,11 +14,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int myIndex = 0;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  List<Widget> myWidget = const [
+  List<Widget> myWidget = [
     // HomeScreen(),
-    SkillsScreen(),
-    Center(child: Text("Sorry , This page is on Working ")),
-    ProfileScreen(),
+    const SkillsScreen(),
+    LeaderboardScreen(),
+    // Center(child: Text("Sorry , This page is on Working ")),
+    const ProfileScreen(),
   ];
 
   void _logout() async {

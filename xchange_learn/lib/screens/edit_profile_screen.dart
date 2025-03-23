@@ -42,6 +42,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
+  void updateUserNameInLeaderBoard(String userId, String newName) async {
+    try {
+      // Update the user's document in Firestore
+      await FirebaseFirestore.instance
+          .collection('leaderboard')
+          .doc(userId) // Ensure you're using the correct document ID
+          .update({"name": newName});
+
+      print("Username updated successfully in leaderboard!");
+    } catch (error) {
+      print("Error updating username: $error");
+    }
+  }
+
   // ✅ Save Updated Profile
   void _saveProfile() async {
     setState(() {
@@ -56,7 +70,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'profilePic': _profilePic, // Update later with image upload
         'skills': _skills,
       });
-
+      updateUserNameInLeaderBoard(user.uid, _nameController.text.trim());
       setState(() {
         _isLoading = false;
       });

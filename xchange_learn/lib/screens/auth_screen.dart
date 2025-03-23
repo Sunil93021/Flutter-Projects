@@ -27,6 +27,23 @@ class _AuthScreensState extends State<AuthScreens> {
     return "User$randomNumber";
   }
 
+  //intitalize a varible message Count in firebase for ranking purpose
+  Future<void> registerUser(String userId, String name) async {
+    try {
+      DocumentReference userRef = FirebaseFirestore.instance
+          .collection('leaderboard')
+          .doc(userId);
+
+      DocumentSnapshot userDoc = await userRef.get();
+
+      if (!userDoc.exists) {
+        await userRef.set({"name": name, "messageCount": 0});
+      }
+    } catch (e) {
+      print("Error registering user: $e");
+    }
+  }
+
   void _submitAuthForm() async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
@@ -58,7 +75,7 @@ class _AuthScreensState extends State<AuthScreens> {
               .collection('users')
               .doc(userCredential.user!.uid)
               .set(
-                {'name': randomName, 'email': email},
+                {'name': randomName, 'email': email, 'messageCount': 0},
                 SetOptions(
                   merge: true,
                 ), // Merge to avoid overwriting existing fields
@@ -79,6 +96,7 @@ class _AuthScreensState extends State<AuthScreens> {
           'name': randomName,
           'email': email,
         });
+        registerUser(userCredential.user!.uid, randomName);
       }
 
       if (userCredential.user != null) {

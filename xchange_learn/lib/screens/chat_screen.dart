@@ -40,6 +40,19 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  //this is to increament messageCount
+  Future<void> incrementMessageCount(String userId) async {
+    try {
+      DocumentReference userRef = FirebaseFirestore.instance
+          .collection('leaderboard')
+          .doc(userId);
+
+      await userRef.update({"messageCount": FieldValue.increment(1)});
+    } catch (e) {
+      print("Error incrementing message count: $e");
+    }
+  }
+
   // ✅ Send Message to Firestore
   void _sendMessage() async {
     if (_messageController.text.trim().isEmpty) return;
@@ -54,7 +67,7 @@ class _ChatScreenState extends State<ChatScreen> {
           "senderName": _username,
           "timestamp": FieldValue.serverTimestamp(),
         });
-
+    incrementMessageCount(_user!.uid);
     _messageController.clear();
   }
 
